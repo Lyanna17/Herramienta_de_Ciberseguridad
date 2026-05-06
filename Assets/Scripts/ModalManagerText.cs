@@ -20,6 +20,7 @@ public class ModalManagerText : MonoBehaviour
     public void ShowModal()
     {
         modalWindow.SetActive(true);
+        FindObjectOfType<TaskManager>().OnNotasAbiertas();
     }
 
     public void HideModal()

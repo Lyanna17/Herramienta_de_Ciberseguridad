@@ -8,5 +8,6 @@ public class Tester : MonoBehaviour
     public void popUpModal()
     {
         ModalManager.instance.ShowModal();
+        
     }
 }

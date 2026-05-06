@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
 
 public class TutorialManager : MonoBehaviour
 {
@@ -23,6 +22,11 @@ public class TutorialManager : MonoBehaviour
     public GameObject libroTutorialPanel;
     public Button btnListoLibro;
 
+    [Header("Spotlight - BttonTask")]
+    public GameObject bttonTaskIcon;
+    public GameObject bttonTaskPanel;
+    public Button btnListoTask;
+
     [Header("Animacion")]
     public float fadeSpeed = 1.5f;
     public float moveSpeed = 0.4f;
@@ -32,16 +36,18 @@ public class TutorialManager : MonoBehaviour
     private GraphicRaycaster tutorialRaycaster;
     private Canvas libroCanvas;
     private GraphicRaycaster libroRaycaster;
+    private Canvas taskCanvas;
+    private GraphicRaycaster taskRaycaster;
 
     void Start()
     {
         if (PlayerPrefs.GetInt("TutorialCompletado", 0) == 1)
         {
-            // Ya completó el tutorial, ocultar todo
             overlay.SetActive(false);
             welcomePanel.SetActive(false);
             terminalTutorialPanel.SetActive(false);
             libroTutorialPanel.SetActive(false);
+            bttonTaskPanel.SetActive(false);
             return;
         }
 
@@ -52,11 +58,13 @@ public class TutorialManager : MonoBehaviour
         welcomePanel.SetActive(true);
         terminalTutorialPanel.SetActive(false);
         libroTutorialPanel.SetActive(false);
+        bttonTaskPanel.SetActive(false);
         canvasGroup.alpha = 0f;
 
         btnContinuar.onClick.AddListener(() => StartCoroutine(FadeOutThenSpotlightTerminal()));
         btnListoTerminal.onClick.AddListener(() => StartCoroutine(MoveSpotlightToLibro()));
-        btnListoLibro.onClick.AddListener(CerrarTutorial);
+        btnListoLibro.onClick.AddListener(() => StartCoroutine(MoveSpotlightToTask()));
+        btnListoTask.onClick.AddListener(CerrarTutorial);
 
         StartCoroutine(FadeIn());
     }
@@ -99,8 +107,8 @@ public class TutorialManager : MonoBehaviour
         RectTransform panelRect    = terminalTutorialPanel.GetComponent<RectTransform>();
 
         Vector2 startPos = panelRect.anchoredPosition;
-        Vector2 endPos   = panelRect.anchoredPosition + 
-                        (libroRect.anchoredPosition - terminalRect.anchoredPosition);
+        Vector2 endPos   = panelRect.anchoredPosition +
+                           (libroRect.anchoredPosition - terminalRect.anchoredPosition);
 
         terminalTutorialPanel.SetActive(true);
 
@@ -120,24 +128,70 @@ public class TutorialManager : MonoBehaviour
         yield return null;
         if (tutorialCanvas != null) Destroy(tutorialCanvas);
 
-        libroCanvas            = libroIcon.AddComponent<Canvas>();
+        libroCanvas = libroIcon.AddComponent<Canvas>();
         libroCanvas.overrideSorting = true;
-        libroCanvas.sortingOrder    = 10;
-        libroRaycaster         = libroIcon.AddComponent<GraphicRaycaster>();
+        libroCanvas.sortingOrder = 10;
+        libroRaycaster = libroIcon.AddComponent<GraphicRaycaster>();
 
         libroTutorialPanel.SetActive(true);
     }
 
-    void CerrarTutorial()
+    IEnumerator MoveSpotlightToTask()
     {
-        if (libroRaycaster != null) Destroy(libroRaycaster);
-        StartCoroutine(DestroyCanvasAfterFrame());
+        libroTutorialPanel.SetActive(false);
+
+        RectTransform libroRect    = libroIcon.GetComponent<RectTransform>();
+        RectTransform taskRect     = bttonTaskIcon.GetComponent<RectTransform>();
+        RectTransform panelRect    = libroTutorialPanel.GetComponent<RectTransform>();
+
+        Vector2 startPos = panelRect.anchoredPosition;
+        Vector2 endPos   = panelRect.anchoredPosition +
+                           (taskRect.anchoredPosition - libroRect.anchoredPosition);
+
+        libroTutorialPanel.SetActive(true);
+
+        float elapsed = 0f;
+        while (elapsed < moveSpeed)
+        {
+            elapsed += Time.deltaTime;
+            float t  = elapsed / moveSpeed;
+            t        = Mathf.SmoothStep(0f, 1f, t);
+            panelRect.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
+            yield return null;
+        }
 
         libroTutorialPanel.SetActive(false);
+
+        if (libroRaycaster != null) Destroy(libroRaycaster);
+        yield return null;
+        if (libroCanvas != null) Destroy(libroCanvas);
+
+        taskCanvas = bttonTaskIcon.AddComponent<Canvas>();
+        taskCanvas.overrideSorting = true;
+        taskCanvas.sortingOrder = 10;
+        taskRaycaster = bttonTaskIcon.AddComponent<GraphicRaycaster>();
+
+        bttonTaskPanel.SetActive(true);
+    }
+
+    void CerrarTutorial()
+    {
+        if (taskRaycaster != null) Destroy(taskRaycaster);
+        StartCoroutine(DestroyCanvasAfterFrame());
+
+        bttonTaskPanel.SetActive(false);
         overlay.SetActive(false);
         welcomePanel.SetActive(false);
 
+        FindObjectOfType<TaskManager>().ToggleTaskPanel();
+
         StartCoroutine(MarcarTutorialCompletado());
+    }
+
+    IEnumerator DestroyCanvasAfterFrame()
+    {
+        yield return null;
+        if (taskCanvas != null) Destroy(taskCanvas);
     }
 
     IEnumerator MarcarTutorialCompletado()
@@ -162,9 +216,4 @@ public class TutorialManager : MonoBehaviour
             PlayerPrefs.Save();
         }
     }
-    IEnumerator DestroyCanvasAfterFrame()
-{
-    yield return null;
-    if (libroCanvas != null) Destroy(libroCanvas);
-}
 }

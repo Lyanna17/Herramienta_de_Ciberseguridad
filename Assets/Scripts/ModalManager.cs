@@ -5,16 +5,13 @@ using TMPro;
 
 public class ModalManager : MonoBehaviour
 {
-
     public GameObject modalWindow;
-
     public static ModalManager instance;
 
     void Awake()
     {
         if (instance == null)
             instance = this;
-        
         else
             Destroy(gameObject);
     }
@@ -22,11 +19,12 @@ public class ModalManager : MonoBehaviour
     public void ShowModal()
     {
         modalWindow.SetActive(true);
+        FindObjectOfType<TaskManager>().OnTerminalAbierta();
     }
 
     public void HideModal()
     {
         modalWindow.SetActive(false);
+        FindObjectOfType<TaskManager>().OnTerminalCerrada();
     }
-
 }
