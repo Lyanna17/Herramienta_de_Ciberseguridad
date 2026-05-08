@@ -1,172 +1,147 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Interpreter : MonoBehaviour
 {
+    [Header("Prefabs visuales (solo decorativos)")]
     public GameObject folderPrefab;
-    public Transform desktopArea;
     public GameObject textFilePrefab;
+    public Transform  desktopArea;
 
-    Dictionary<string, GameObject> files = new Dictionary<string, GameObject>();
-    Dictionary<string, GameObject> folders = new Dictionary<string, GameObject>();
+    // Seguimiento de íconos en el escritorio
+    Dictionary<string, GameObject> spawnedIcons = new Dictionary<string, GameObject>();
 
-    Vector2 nextPosition = new Vector2(20, -20);
-    float startX = 20f;
-    float startY;
+    // Posición en grilla para los íconos
+    float currentX  = 20f;
+    float currentY  = -20f;
+    float offsetX   = 80f;
+    float offsetY   = 80f;
+    float startX    = 20f;
+    float startY    = -20f;
+    float panelH;
 
-    float offsetX = 50f;
-    float offsetY = 50f;
-
-    float currentX;
-    float currentY;
-
-    float rectHeight;
-
-
-    List<string> response = new List<string>();
-
-    TerminalSystem terminal; 
+    TerminalSystem terminal;
 
     void Start()
     {
         terminal = new TerminalSystem();
 
         RectTransform rect = desktopArea.GetComponent<RectTransform>();
-        rectHeight = rect.rect.height;
-
-        startY = -20f; 
-        currentX = 20f;
-        currentY = startY;
+        panelH = rect.rect.height;
     }
 
     public List<string> Interpret(string userInput)
     {
-        response.Clear();
+        var response = new List<string>();
 
-        if(string.IsNullOrWhiteSpace(userInput))
+        if (string.IsNullOrWhiteSpace(userInput))
             return response;
 
-        if(userInput == "-help")
+        if (userInput.Trim() == "-help")
         {
-            response.Add("Comandos disponibles:");
-            response.Add("ls, cd, pwd, cat, head, tail, cp, mv, rm, grep");
-            response.Add("chmod, chown, dd, shutdown, su, aptitude");
+            response.Add("Comandos disponibles: ls, cd, pwd, cat");
+            response.Add("chmod, chown, shutdown,");
+            response.Add("sudo su, mkdir, touch, echo");
             return response;
         }
 
-        // concetar todo con el systema de terminal
-        string result = terminal.Execute(userInput);
+        // Guardar entradas ANTES (snapshot real del fileSystem)
+        string dirAntes     = terminal.CurrentDirectory;
+        var    entriesAntes = ObtenerEntradas(dirAntes);
 
-        // Manejo de múltiples líneas
-        string[] lines = result.Split('\n');
+        // Ejecutar — esto modifica el fileSystem internamente
+        string raw = terminal.Execute(userInput);
 
-        foreach(string line in lines)
+        // Leer entradas DESPUÉS del mismo directorio donde se ejecutó
+        var entriesDespues = ObtenerEntradas(dirAntes);
+
+        // Detectar creaciones
+        foreach (var nombre in entriesDespues)
         {
-            if(!string.IsNullOrWhiteSpace(line))
-                response.Add(line);
+            if (!entriesAntes.Contains(nombre))
+                SpawnIcono(dirAntes, nombre);
         }
 
-        string[] parts = userInput.Split(' ');
-
-        if(parts[0] == "mkdir" && parts.Length > 1)
+        // Detectar eliminaciones
+        foreach (var nombre in entriesAntes)
         {
-            string folderName = parts[1];
-
-            CreateFolder(folderName);
-
-            return new List<string> { "Directorio creado: " + folderName };
+            if (!entriesDespues.Contains(nombre))
+                DestroyIcono(dirAntes, nombre);
         }
 
-        if(parts[0] == "echo" && parts.Length > 1)
+        // Mostrar resultado en terminal
+        if (!string.IsNullOrEmpty(raw))
         {
-            string fileName = parts[1];
-
-            CreateTextFile(fileName);
-
-            return new List<string> { "Archivo creado: " + fileName };
-        }
-
-        if(parts[0] == "rm" && parts.Length > 1)
-        {
-            // rm -r carpeta
-            if(parts[1] == "-r" && parts.Length > 2)
+            foreach (string line in raw.Split('\n'))
             {
-                string folderName = parts[2];
-
-                if(folders.ContainsKey(folderName))
-                {
-                    Destroy(folders[folderName]);
-                    folders.Remove(folderName);
-
-                    return new List<string> { "Carpeta eliminada: " + folderName };
-                }
-                else
-                {
-                    return new List<string> { "Carpeta no encontrada" };
-                }
-            }
-            else
-            {
-                // rm archivo
-                string fileName = parts[1];
-
-                if(files.ContainsKey(fileName))
-                {
-                    Destroy(files[fileName]);
-                    files.Remove(fileName);
-
-                    return new List<string> { "Archivo eliminado: " + fileName };
-                }
-                else
-                {
-                    return new List<string> { "Archivo no encontrado" };
-                }
+                string display = line.StartsWith("ERROR:") ? line.Substring(6) : line;
+                if (!string.IsNullOrWhiteSpace(display))
+                    response.Add(display);
             }
         }
 
         return response;
     }
 
-    void CreateFolder(string folderName)
+    // Devuelve la lista actual de entradas de un directorio
+    // (usa reflexión mínima para no exponer todo el fileSystem)
+    HashSet<string> ObtenerEntradas(string dirPath)
     {
-        GameObject folder = Instantiate(folderPrefab, desktopArea);
-
-        folder.GetComponent<Folder>().SetName(folderName);
-
-        //posicion
-        RectTransform rt = folder.GetComponent<RectTransform>();
-        rt.anchoredPosition = new Vector2(currentX, currentY);
-
-        folders.Add(folderName, folder);
-
-        UpdateNextPosition();
+        return new HashSet<string>(terminal.GetEntradas(dirPath));
     }
 
-    void CreateTextFile(string fileName)
+    void SpawnIcono(string dir, string nombre)
     {
-        GameObject file = Instantiate(textFilePrefab, desktopArea);
+        // Solo spawnear en el directorio del Desktop por ahora (o en todos)
+        // Puedes agregar un filtro: if (!dir.Contains("Desktop")) return;
 
-        file.GetComponent<Folder>().SetName(fileName);
+        string key = dir + "/" + nombre;
+        if (spawnedIcons.ContainsKey(key)) return;
 
-        //posicion
-        RectTransform rt = file.GetComponent<RectTransform>();
+        // Determinar si es carpeta o archivo según si tiene extensión
+        bool esCarpeta = !nombre.Contains(".");
+        GameObject prefab = esCarpeta ? folderPrefab : textFilePrefab;
+        if (prefab == null) return;
+
+        GameObject icono = Instantiate(prefab, desktopArea);
+
+        // Asignar nombre en el label del prefab
+        var folder = icono.GetComponent<Folder>();
+        if (folder != null) folder.SetName(nombre);
+        else
+        {
+            var label = icono.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+            if (label != null) label.text = nombre;
+        }
+
+        // Posición en grilla
+        RectTransform rt = icono.GetComponent<RectTransform>();
         rt.anchoredPosition = new Vector2(currentX, currentY);
-
-        files.Add(fileName, file);
-
         UpdateNextPosition();
+
+        // Desactivar interacción de clic (solo visual)
+        var btn = icono.GetComponent<UnityEngine.UI.Button>();
+        if (btn != null) btn.interactable = false;
+
+        spawnedIcons[key] = icono;
+    }
+
+    void DestroyIcono(string dir, string nombre)
+    {
+        string key = dir + "/" + nombre;
+        if (!spawnedIcons.ContainsKey(key)) return;
+
+        Destroy(spawnedIcons[key]);
+        spawnedIcons.Remove(key);
     }
 
     void UpdateNextPosition()
-{
-    currentY -= offsetY;
-
-    // límite inferior (dentro del panel)
-    if (currentY < -rectHeight + 100f)
     {
-        currentY = startY;
-        currentX += offsetX;
+        currentY -= offsetY;
+        if (currentY < -panelH + 100f)
+        {
+            currentY  = startY;
+            currentX += offsetX;
+        }
     }
-}
 }

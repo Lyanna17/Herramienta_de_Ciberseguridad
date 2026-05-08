@@ -149,6 +149,9 @@ public class TerminalSystem
         switch (cmd)
         {
             case "ls":         return CmdLs(args);
+            case "mkdir":      return CmdMkdir(args);
+            case "touch":      return CmdTouch(args);
+            case "echo":       return CmdEcho(raw);
             case "pwd":        return CmdPwd();
             case "cd":         return CmdCd(args);
             case "cat":        return CmdCat(args);
@@ -552,4 +555,117 @@ public class TerminalSystem
     }
 
     static string Error(string msg) => "ERROR:" + msg;
+
+    // ─── MKDIR ────────────────────────────────────────────────
+    string CmdMkdir(string[] args)
+    {
+        if (args.Length == 0) return Error("mkdir: missing operand");
+
+        var sb = new System.Text.StringBuilder();
+        foreach (var name in args)
+        {
+            string path = CombinePath(CurrentDirectory, name);
+
+            if (fileSystem.ContainsKey(path) ||
+                (fileSystem.ContainsKey(CurrentDirectory) &&
+                fileSystem[CurrentDirectory].Contains(name)))
+            {
+                sb.AppendLine(Error($"mkdir: cannot create directory '{name}': File exists"));
+                continue;
+            }
+
+            // Registrar en el sistema de archivos virtual
+            if (fileSystem.ContainsKey(CurrentDirectory))
+                fileSystem[CurrentDirectory].Add(name);
+
+            fileSystem[path]      = new List<string>();
+            fileOwners[path]      = CurrentUser;
+            filePermissions[path] = "drwxr-xr-x";
+        }
+        return sb.ToString().TrimEnd();
+    }
+
+    // ─── TOUCH ────────────────────────────────────────────────
+    string CmdTouch(string[] args)
+    {
+        if (args.Length == 0) return Error("touch: missing operand");
+
+        foreach (var name in args)
+        {
+            string path = CombinePath(CurrentDirectory, name);
+
+            // Si ya existe (archivo o directorio), touch no hace nada
+            if (fileContents.ContainsKey(path) || fileSystem.ContainsKey(path))
+                continue;
+
+            // Crear archivo vacío
+            if (fileSystem.ContainsKey(CurrentDirectory))
+                fileSystem[CurrentDirectory].Add(name);
+
+            fileContents[path]    = "";
+            fileOwners[path]      = CurrentUser;
+            filePermissions[path] = "-rw-r--r--";
+        }
+        return "";
+    }
+
+    // ─── ECHO ─────────────────────────────────────────────────
+    string CmdEcho(string raw)
+    {
+        // Detectar redirección >> (append) o > (sobreescribir)
+        bool isAppend   = raw.Contains(">>");
+        bool isRedirect = raw.Contains(">");
+
+        if (!isRedirect)
+        {
+            // echo sin redirección: imprime el texto después de "echo"
+            string text = raw.Length > 4 ? raw.Substring(4).Trim() : "";
+            text = text.Trim('"').Trim('\'');
+            return text;
+        }
+
+        // Separar en: [parte izquierda] >> o > [nombre de archivo]
+        string sep      = isAppend ? ">>" : ">";
+        int    sepIdx   = raw.IndexOf(sep);
+        string leftPart = raw.Substring(0, sepIdx).Trim();
+        string fileName = raw.Substring(sepIdx + sep.Length).Trim().Trim('"').Trim('\'');
+
+        if (string.IsNullOrEmpty(fileName))
+        return Error("bash: syntax error near unexpected token 'newline'");
+
+        // Extraer el texto (quitar la palabra "echo" y las comillas)
+        string content = leftPart.Length > 4 ? leftPart.Substring(4).Trim() : "";
+        content = content.Trim('"').Trim('\'');
+
+        string filePath = CombinePath(CurrentDirectory, fileName);
+
+        if (fileSystem.ContainsKey(filePath))
+            return Error($"bash: {fileName}: Is a directory");
+
+        if (fileContents.ContainsKey(filePath))
+        {
+            // El archivo ya existe: sobreescribir o agregar
+            fileContents[filePath] = isAppend
+                ? fileContents[filePath] + "\n" + content
+                : content;
+        }
+        else
+        {
+            // Crear el archivo con el contenido
+            if (fileSystem.ContainsKey(CurrentDirectory))
+                fileSystem[CurrentDirectory].Add(fileName);
+
+            fileContents[filePath]    = content;
+            fileOwners[filePath]      = CurrentUser;
+            filePermissions[filePath] = "-rw-r--r--";
+        }
+
+        return ""; // echo con redirección no imprime nada en consola
+    }
+
+    public List<string> GetEntradas(string dirPath)
+    {
+        if (!fileSystem.ContainsKey(dirPath)) return new List<string>();
+        return new List<string>(fileSystem[dirPath]);
+    }
 }

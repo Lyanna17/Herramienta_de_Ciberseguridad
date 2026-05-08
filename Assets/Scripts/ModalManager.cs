@@ -19,12 +19,14 @@ public class ModalManager : MonoBehaviour
     public void ShowModal()
     {
         modalWindow.SetActive(true);
-        FindObjectOfType<TaskManager>().OnTerminalAbierta();
+        TaskManager tm = FindObjectOfType<TaskManager>();
+        if (tm != null) tm.OnTerminalAbierta();
     }
 
     public void HideModal()
     {
         modalWindow.SetActive(false);
-        FindObjectOfType<TaskManager>().OnTerminalCerrada();
+        TaskManager tm = FindObjectOfType<TaskManager>();
+        if (tm != null) tm.OnTerminalCerrada();
     }
 }
