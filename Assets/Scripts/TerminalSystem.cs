@@ -132,10 +132,11 @@ public class TerminalSystem
 
     public string Execute(string raw)
     {
+        raw = raw.Trim();
         string[] tokens = raw.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         if (tokens.Length == 0) return "";
 
-        string   cmd    = tokens[0];
+        string   cmd    = tokens[0].ToLower();
         string[] args   = tokens.Skip(1).ToArray();
         bool     isSudo = false;
 
@@ -148,6 +149,8 @@ public class TerminalSystem
 
         switch (cmd)
         {
+            case "ifconfig":   return CmdIfconfig(args); 
+            case "clear":      return "%%CLEAR%%"; 
             case "ls":         return CmdLs(args);
             case "mkdir":      return CmdMkdir(args);
             case "touch":      return CmdTouch(args);
@@ -209,7 +212,7 @@ public class TerminalSystem
                 string perm  = filePermissions.ContainsKey(fp) ? filePermissions[fp] : (isDir ? "drwxr-xr-x" : "-rw-r--r--");
                 string owner = fileOwners.ContainsKey(fp) ? fileOwners[fp] : CurrentUser;
                 string group = owner == "root" ? "root" : owner == "syslog" ? "adm" : owner == "utmp" ? "utmp" : owner;
-                int    size  = isDir ? 4096 : UnityEngine.Random.Range(100, 9999);
+                int    size  = isDir ? 4096 : (fileContents.ContainsKey(fp) ? System.Text.Encoding.UTF8.GetByteCount(fileContents[fp]) : 0);
                 string links = isDir ? "2" : "1";
                 string color = isDir ? "#6ad4ff" : "#ffffff";
                 sb.AppendLine($"{perm}  {links} {owner} {group}  {size,6} Dec 20  2017 <color={color}>{e}</color>");
@@ -578,7 +581,6 @@ public class TerminalSystem
 
     static string Error(string msg) => "ERROR:" + msg;
 
-    // ─── MKDIR ────────────────────────────────────────────────
     string CmdMkdir(string[] args)
     {
         if (args.Length == 0) return Error("mkdir: missing operand");
@@ -607,7 +609,6 @@ public class TerminalSystem
         return sb.ToString().TrimEnd();
     }
 
-    // ─── TOUCH ────────────────────────────────────────────────
     string CmdTouch(string[] args)
     {
         if (args.Length == 0) return Error("touch: missing operand");
@@ -630,8 +631,6 @@ public class TerminalSystem
         }
         return "";
     }
-
-    // ─── ECHO ─────────────────────────────────────────────────
     string CmdEcho(string raw)
     {
         // Detectar redirección >> (append) o > (sobreescribir)
@@ -682,7 +681,54 @@ public class TerminalSystem
             filePermissions[filePath] = "-rw-r--r--";
         }
 
-        return ""; // echo con redirección no imprime nada en consola
+        return ""; 
+    }
+
+    string CmdIfconfig(string[] args)
+    {
+    // Sin argumentos: muestra todas las interfaces
+    if (args.Length == 0)
+    {
+        return
+            "eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500\n" +
+            "        inet 192.168.1.105  netmask 255.255.255.0  broadcast 192.168.1.255\n" +
+            "        inet6 fe80::a00:27ff:fe4e:66a1  prefixlen 64  scopeid 0x20<link>\n" +
+            "        ether 08:00:27:4e:66:a1  txqueuelen 1000  (Ethernet)\n" +
+            "        RX packets 8523  bytes 9216384 (8.7 MiB)\n" +
+            "        RX errors 0  dropped 0  overruns 0  frame 0\n" +
+            "        TX packets 4271  bytes 614123 (599.7 KiB)\n" +
+            "        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0\n" +
+            "\n" +
+            "lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536\n" +
+            "        inet 127.0.0.1  netmask 255.0.0.0\n" +
+            "        inet6 ::1  prefixlen 128  scopeid 0x10<host>\n" +
+            "        loop  txqueuelen 1000  (Local Loopback)\n" +
+            "        RX packets 120  bytes 10440 (10.1 KiB)\n" +
+            "        TX packets 120  bytes 10440 (10.1 KiB)";
+    }
+
+    // ifconfig eth0 o ifconfig lo
+    string iface = args[0];
+    if (iface == "eth0")
+    {
+        return
+            "eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500\n" +
+            "        inet 192.168.1.105  netmask 255.255.255.0  broadcast 192.168.1.255\n" +
+            "        inet6 fe80::a00:27ff:fe4e:66a1  prefixlen 64  scopeid 0x20<link>\n" +
+            "        ether 08:00:27:4e:66:a1  txqueuelen 1000  (Ethernet)\n" +
+            "        RX packets 8523  bytes 9216384 (8.7 MiB)\n" +
+            "        TX packets 4271  bytes 614123 (599.7 KiB)";
+    }
+    if (iface == "lo")
+    {
+        return
+            "lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536\n" +
+            "        inet 127.0.0.1  netmask 255.0.0.0\n" +
+            "        inet6 ::1  prefixlen 128  scopeid 0x10<host>\n" +
+            "        loop  txqueuelen 1000  (Local Loopback)";
+    }
+
+    return Error($"ifconfig: interface '{iface}' does not exist");
     }
 
     public List<string> GetEntradas(string dirPath)
