@@ -217,13 +217,35 @@ public class TerminalSystem
         }
         else
         {
+            // Calcular el ancho máximo para alinear en columnas
+            int maxLen = 0;
+            foreach (var e in entries)
+                if (e.Length > maxLen) maxLen = e.Length;
+
+            int colWidth  = maxLen + 2;   // padding entre columnas
+            int termCols  = 4;            // columnas por fila (ajusta según tu terminal)
+            int count     = 0;
+
             foreach (var e in entries)
             {
                 string fp    = CombinePath(targetPath, e);
                 bool   isDir = fileSystem.ContainsKey(fp) || e == "." || e == "..";
                 string color = isDir ? "#6ad4ff" : "#ffffff";
-                sb.Append($"<color={color}>{e}</color>  ");
+                string label = isDir ? e + "/" : e;
+
+                sb.Append($"<color={color}>{label}</color>");
+
+                count++;
+                // Salto de línea cada `termCols` entradas
+                if (count % termCols == 0)
+                    sb.AppendLine();
+                else
+                    sb.Append("  "); // separador entre columnas
             }
+
+            // Si la última fila no llegó al límite, cerrar con newline
+            if (count % termCols != 0)
+                sb.AppendLine();
         }
 
         return sb.ToString().TrimEnd();
