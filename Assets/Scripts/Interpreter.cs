@@ -38,8 +38,8 @@ public class Interpreter : MonoBehaviour
         if (userInput.Trim() == "-help")
         {
             response.Add("Comandos disponibles: ls, cd, pwd, cat");
-            response.Add("chmod, chown, shutdown,");
-            response.Add("sudo su, mkdir, touch, echo");
+            response.Add("chmod, chown, ifconfig,");
+            response.Add("touch, mkdir, whoami, echo");
             return response;
         }
 
