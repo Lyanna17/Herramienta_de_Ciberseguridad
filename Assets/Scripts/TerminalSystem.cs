@@ -899,13 +899,7 @@ public class TerminalSystem
             "\n" +
             "FLAG{br4ck3t_h4ck3r_m0dul0_2_c0mpl3t4d0}\n" +
             "\n" +
-            "¡Felicitaciones! Completaste el Modulo 2.\n" +
-            "Habilidades demostradas:\n" +
-            "  [+] Reconocimiento de red con ifconfig y ping\n" +
-            "  [+] Escaneo de puertos con nmap\n" +
-            "  [+] Ataque de fuerza bruta con hydra\n" +
-            "  [+] Acceso remoto por SSH\n" +
-            "  [+] Post-explotacion y escalada de directorios";
+            "¡Felicitaciones! Completaste el Modulo 2";
 
         fileOwners[$"{home}/notas.txt"]          = "admin";
         fileOwners[$"{home}/backup/db_backup.sql"] = "admin";
