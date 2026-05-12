@@ -49,6 +49,36 @@ public class TerminalManager : MonoBehaviour
             terminalInput.ActivateInputField();
             terminalInput.Select();
         }
+
+                if (terminalInput.isFocused && terminalInput.text != "" && Input.GetKeyDown(KeyCode.Return))
+        {
+            string userInput = terminalInput.text;
+            ClearInputField();
+
+            List<string> interpretation = interpreter.Interpret(userInput);
+
+            if (interpretation.Count == 1 && interpretation[0] == "%%CLEAR%%")
+            {
+                ClearTerminal();
+                userInputLine.transform.SetAsLastSibling();
+                terminalInput.ActivateInputField();
+                terminalInput.Select();
+                return;
+            }
+
+            // Si estaba esperando password, mostrar asteriscos en vez del texto
+            string displayInput = interpreter.EsperandoPassword()
+                ? new string('*', userInput.Length)
+                : userInput;
+
+            AddDirectoryLine(displayInput);
+
+            int lines = AddInterpreterLines(interpretation);
+            ScrollToBottom(lines);
+            userInputLine.transform.SetAsLastSibling();
+            terminalInput.ActivateInputField();
+            terminalInput.Select();
+        }
     }
 
     void ClearInputField()

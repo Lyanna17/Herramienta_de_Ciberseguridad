@@ -138,4 +138,9 @@ public class Interpreter : MonoBehaviour
             currentX += offsetX;
         }
     }
+
+    public bool EsperandoPassword()
+    {
+        return terminal.EsperandoPasswordSSH();
+    }
 }

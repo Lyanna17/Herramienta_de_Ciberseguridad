@@ -21,6 +21,8 @@ public class TerminalSystem
         InitFileSystem();
     }
 
+    public bool EsperandoPasswordSSH() => esperandoPasswordSSH;
+
     void InitFileSystem()
     {
         fileSystem = new Dictionary<string, List<string>>
@@ -52,6 +54,9 @@ public class TerminalSystem
             { "/var/log/apt",                                new List<string>() },
             { "/var/log/fsck",                               new List<string>() },
             { "/var/log/upstart",                            new List<string>() },
+            { "/usr",                                        new List<string> { "share" } },
+            { "/usr/share",                                  new List<string> { "wordlists" } },
+            { "/usr/share/wordlists",                        new List<string> { "rockyou.txt", "common.txt" } },
         };
 
         string[] dirs = {
@@ -99,12 +104,14 @@ public class TerminalSystem
     void InitFileContents()
     {
         fileContents["/home/sysadmin/Documents/animals.txt"]      = "1 retriever\n2 badger\n3 bat\n4 wolf\n5 eagle";
+
         fileContents["/home/sysadmin/Documents/alpha.txt"]        =
             "A is for Apple\nB is for Bear\nC is for Cat\nD is for Dog\nE is for Elephant\n" +
             "F is for Flower\nG is for Grapes\nH is for Happy\nI is for Ink\nJ is for Juice\n" +
             "K is for Kangaroo\nL is for Lol\nM is for Monkey\nN is for Nickel\nO is for Oval\n" +
             "P is for Pickle\nQ is for Quark\nR is for Rat\nS is for Sloth\nT is for Turnip\n" +
             "U is for Up\nV is for Velvet\nW is for Walrus\nX is for Xenon\nY is for Yellow\nZ is for Zebra";
+            
         fileContents["/home/sysadmin/Documents/alpha-first.txt"]  = "A is for Animal\nB is for Bear\nC is for Cat\nD is for Dog\nE is for Elephant\nF is for Flower";
         fileContents["/home/sysadmin/Documents/alpha-second.txt"] = "G is for Grapes\nH is for Happy\nI is for Ink\nJ is for Juice\nK is for Kangaroo\nL is for Lol";
         fileContents["/home/sysadmin/Documents/alpha-third.txt"]  = "M is for Monkey\nN is for Nickel\nO is for Oval\nP is for Pickle\nQ is for Quark\nR is for Rat";
@@ -122,17 +129,33 @@ public class TerminalSystem
         fileContents["/home/sysadmin/Documents/hidden.txt"]       = "This file contains hidden information.";
         fileContents["/home/sysadmin/Documents/longfile.txt"]     =
             string.Join("\n", Enumerable.Range(1, 200).Select(i => $"Line {i}: Lorem ipsum dolor sit amet."));
+
         fileContents["/etc/passwd"] =
             "root:x:0:0:root:/root:/bin/bash\n" +
             "daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n" +
             "bin:x:2:2:bin:/bin:/usr/sbin/nologin\n" +
             "operator:x:1000:37::/root:\n" +
             "sysadmin:x:1001:1001:System Administrator,,,,:/home/sysadmin:/bin/bash";
+
+        fileContents["/usr/share/wordlists/rockyou.txt"] =
+            "123456\npassword\n12345678\nqwerty\n123456789\n" +
+            "12345\n1234567\nletmein\n1234567890\ndragon\n" +
+            "baseball\nbatman123\niloveyou\nmaster\nsunshine\nmonkey\n" +
+            "welcome\nshadow\npassword123\nadmin\nlogin";
+
+        fileContents["/usr/share/wordlists/common.txt"] =
+            "admin\nroot\nuser\ntest\nguest\npassword\n" +
+            "123456\nletmein\nqwerty\nabc123";
     }
 
     public string Execute(string raw)
     {
         raw = raw.Trim();
+
+        // Si estamos esperando la contraseña SSH 
+        if (esperandoPasswordSSH)
+        return ProcesarPasswordSSH(raw);
+
         string[] tokens = raw.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         if (tokens.Length == 0) return "";
 
@@ -158,18 +181,19 @@ public class TerminalSystem
             case "pwd":        return CmdPwd();
             case "cd":         return CmdCd(args);
             case "cat":        return CmdCat(args);
-            case "head":       return CmdHead(args);
-            case "tail":       return CmdTail(args);
             case "cp":         return CmdCp(args);
             case "mv":         return CmdMv(args);
             case "rm":         return CmdRm(args);
-            case "grep":       return CmdGrep(args);
+            case "nmap":       return CmdNmap(args);
+            case "ping":       return CmdPing(args);
+            case "hydra":      return CmdHydra(raw);
+            case "ssh":        return CmdSsh(args);
+            case "service":    return CmdService(args);
+            case "whoami":     return CurrentUser;
             case "chmod":      return CmdChmod(args, isSudo);
             case "chown":      return CmdChown(args, isSudo);
-            case "dd":         return CmdDd(args);
             case "shutdown":   return CmdShutdown(args, isSudo);
             case "su":         return CmdSu(args);
-            case "aptitude":   return CmdAptitude(args);
             case "./hello.sh": return CmdRunScript(isSudo);
             default:           return Error($"-bash: {cmd}: command not found");
         }
@@ -281,35 +305,6 @@ public class TerminalSystem
         return Error($"cat: {args[0]}: No such file or directory");
     }
 
-    string CmdHead(string[] args)
-    {
-        int lines = 10; string fileName = "";
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i] == "-n" && i + 1 < args.Length) int.TryParse(args[++i], out lines);
-            else if (!args[i].StartsWith("-"))           fileName = args[i];
-        }
-        if (string.IsNullOrEmpty(fileName)) return Error("head: missing operand");
-        string path = ResolvePath(fileName);
-        if (!fileContents.ContainsKey(path)) return Error($"head: cannot open '{fileName}' for reading: No such file or directory");
-        return string.Join("\n", fileContents[path].Split('\n').Take(lines));
-    }
-
-    string CmdTail(string[] args)
-    {
-        int lines = 10; string fileName = "";
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i] == "-n" && i + 1 < args.Length) int.TryParse(args[++i], out lines);
-            else if (!args[i].StartsWith("-"))           fileName = args[i];
-        }
-        if (string.IsNullOrEmpty(fileName)) return Error("tail: missing operand");
-        string path = ResolvePath(fileName);
-        if (!fileContents.ContainsKey(path)) return Error($"tail: cannot open '{fileName}' for reading: No such file or directory");
-        var all = fileContents[path].Split('\n');
-        return string.Join("\n", all.Skip(Math.Max(0, all.Length - lines)));
-    }
-
     string CmdCp(string[] args)
     {
         if (args.Length < 2) return Error("cp: missing file operand");
@@ -374,34 +369,6 @@ public class TerminalSystem
         return errors.ToString().TrimEnd();
     }
 
-    string CmdGrep(string[] args)
-    {
-        if (args.Length < 1) return Error("grep: missing pattern");
-        string pattern = "", fileName = "";
-        foreach (var a in args)
-        {
-            if (!a.StartsWith("-"))
-            { if (string.IsNullOrEmpty(pattern)) pattern = a.Trim('\'', '"'); else fileName = a; }
-        }
-        if (string.IsNullOrEmpty(fileName)) return Error("grep: missing file argument");
-        string path = ResolvePath(fileName);
-        if (!fileContents.ContainsKey(path)) return Error($"grep: {fileName}: No such file or directory");
-
-        bool   anchorStart = pattern.StartsWith("^");
-        bool   anchorEnd   = pattern.EndsWith("$") && !pattern.EndsWith("\\$");
-        string clean       = pattern.TrimStart('^').TrimEnd('$');
-
-        var matches = new System.Text.StringBuilder();
-        foreach (var line in fileContents[path].Split('\n'))
-        {
-            bool match = anchorStart ? line.StartsWith(clean, StringComparison.OrdinalIgnoreCase)
-                       : anchorEnd   ? line.EndsWith(clean,   StringComparison.OrdinalIgnoreCase)
-                       :               line.IndexOf(clean,    StringComparison.OrdinalIgnoreCase) >= 0;
-            if (match) matches.AppendLine(line);
-        }
-        return matches.ToString().TrimEnd();
-    }
-
     string CmdChmod(string[] args, bool isSudo)
     {
         if (args.Length < 2) return Error("chmod: missing operand");
@@ -451,39 +418,6 @@ public class TerminalSystem
         return "";
     }
 
-    string CmdDd(string[] args)
-    {
-        string ifVal = "", ofVal = "", bsVal = "512", countVal = "0";
-        foreach (var a in args)
-        {
-            if (a.StartsWith("if="))    ifVal    = a.Substring(3);
-            if (a.StartsWith("of="))    ofVal    = a.Substring(3);
-            if (a.StartsWith("bs="))    bsVal    = a.Substring(3);
-            if (a.StartsWith("count=")) countVal = a.Substring(6);
-        }
-        if (string.IsNullOrEmpty(ifVal) || string.IsNullOrEmpty(ofVal)) return Error("dd: missing operand");
-        long bs = ParseSize(bsVal), count = 0; long.TryParse(countVal, out count);
-        long total = bs * count;
-        string ts = total >= 1048576 ? $"{total / 1048576} MB" : $"{total} bytes";
-        string dp = ResolvePath(ofVal), dpar = GetParent(dp);
-        if (fileSystem.ContainsKey(dpar))
-        {
-            string dn = GetFileName(dp);
-            if (!fileSystem[dpar].Contains(dn)) fileSystem[dpar].Add(dn);
-            fileContents[dp] = $"[binary data: {ts}]";
-            fileOwners[dp]   = CurrentUser; filePermissions[dp] = "-rw-r--r--";
-        }
-        return $"{count}+0 records in\n{count}+0 records out\n{total} bytes ({ts}) copied, 0.825745 s, 635 MB/s";
-    }
-
-    long ParseSize(string s)
-    {
-        if (s.EndsWith("M")) { long v; long.TryParse(s.TrimEnd('M'), out v); return v * 1048576; }
-        if (s.EndsWith("K")) { long v; long.TryParse(s.TrimEnd('K'), out v); return v * 1024; }
-        if (s.EndsWith("G")) { long v; long.TryParse(s.TrimEnd('G'), out v); return v * 1073741824; }
-        long r; long.TryParse(s, out r); return r;
-    }
-
     string CmdShutdown(string[] args, bool isSudo)
     {
         if (!isSudo && CurrentUser != "root") return Error("shutdown: Need to be root");
@@ -508,17 +442,6 @@ public class TerminalSystem
         return "Password:";
     }
 
-    string CmdAptitude(string[] args)
-    {
-        if (args.Length == 0) return Error("aptitude: command not found");
-        if (!Array.Exists(args, a => a == "moo")) return Error($"aptitude: invalid operation {args[0]}");
-        int vc = 0;
-        foreach (var a in args) if (a.StartsWith("-v")) vc += a.Length - 1;
-        if (vc == 0) return "There are no Easter Eggs in this program.";
-        if (vc == 1) return "There really are no Easter Eggs in this program.";
-        if (vc == 2) return "Didn't I already tell you that there are no Easter Eggs in this program?";
-        return "Stop it!";
-    }
 
     string CmdRunScript(bool isSudo)
     {
@@ -729,6 +652,345 @@ public class TerminalSystem
     }
 
     return Error($"ifconfig: interface '{iface}' does not exist");
+    }
+
+    bool   m2_objetivoPingado    = false;
+    bool   m2_puertoEscaneado    = false;
+    bool   m2_wordlistVista      = false;
+    bool   m2_ataqueRealizado    = false;
+    bool   m2_sesionSSH          = false;
+    string m2_passwordEncontrada = "batman123"; 
+    string m2_objetivoIP         = "192.168.1.200";
+    bool   esperandoPasswordSSH = false;
+    string sshUserPendiente     = "";
+    string sshHostPendiente     = "";
+
+    string CmdNmap(string[] args)
+    {
+        if (args.Length == 0)
+            return Error("nmap: you must specify a target");
+
+        // Filtrar flags para obtener la IP
+        string target = "";
+        bool   sV     = false;
+        bool   sS     = false;
+
+        foreach (var a in args)
+        {
+            if (a == "-sV") sV = true;
+            else if (a == "-sS" || a == "-sn") sS = true;
+            else if (!a.StartsWith("-")) target = a;
+        }
+
+        if (target != m2_objetivoIP)
+            return
+                $"Starting Nmap 7.92 ( https://nmap.org )\n" +
+                $"Nmap scan report for {target}\n" +
+                $"Host seems down. If it is really up, but blocking our ping probes, try -Pn\n" +
+                $"Nmap done: 1 IP address (0 hosts up) scanned in 3.12 seconds";
+
+        m2_puertoEscaneado = true;
+
+        if (sV)
+        {
+            return
+                $"Starting Nmap 7.92 ( https://nmap.org )\n" +
+                $"Nmap scan report for {m2_objetivoIP}\n" +
+                $"Host is up (0.00091s latency).\n" +
+                $"\n" +
+                $"PORT    STATE  SERVICE  VERSION\n" +
+                $"22/tcp  open   ssh      OpenSSH 7.4 (protocol 2.0)\n" +
+                $"80/tcp  open   http     Apache httpd 2.4.6\n" +
+                $"443/tcp closed https\n" +
+                $"\n" +
+                $"Service detection performed.\n" +
+                $"Nmap done: 1 IP address (1 host up) scanned in 8.43 seconds";
+        }
+
+        return
+            $"Starting Nmap 7.92 ( https://nmap.org )\n" +
+            $"Nmap scan report for {m2_objetivoIP}\n" +
+            $"Host is up (0.00091s latency).\n" +
+            $"\n" +
+            $"PORT    STATE  SERVICE\n" +
+            $"22/tcp  open   ssh\n" +
+            $"80/tcp  open   http\n" +
+            $"443/tcp closed https\n" +
+            $"\n" +
+            $"Nmap done: 1 IP address (1 host up) scanned in 5.21 seconds";
+    }
+
+    //  HYDRA 
+    string CmdHydra(string raw)
+    {
+        // Validar que tenga los parámetros mínimos
+        bool tieneL  = raw.Contains("-l ");
+        bool tieneP  = raw.Contains("-P ");
+        bool tieneSsh = raw.Contains("ssh://");
+
+        if (!tieneL || !tieneP || !tieneSsh)
+        {
+            return
+                "Hydra v9.3 (c) 2022 by van Hauser/THC\n" +
+                "Syntax: hydra -l user -P passlist.txt ssh://target\n" +
+                "        hydra -L userlist.txt -P passlist.txt ssh://target\n" +
+                Error("hydra: missing required parameters (-l, -P, target)");
+        }
+
+        if (!m2_puertoEscaneado)
+            return
+                "[WARNING] Hydra: target 192.168.1.200 — connection refused\n" +
+                "[ERROR] could not connect to ssh://192.168.1.200:22\n" +
+                "Tip: scan the target first with nmap to verify port 22 is open";
+
+        // Simular el ataque con progreso
+        m2_ataqueRealizado = true;
+
+        return
+            "Hydra v9.3 (c) 2022 by van Hauser/THC & David Maciejak\n" +
+            "Hydra (https://github.com/vanhauser-thc/thc-hydra)\n" +
+            $"[DATA] max 16 tasks per 1 server, overall 16 tasks\n" +
+            $"[DATA] attacking ssh://{m2_objetivoIP}:22/\n" +
+            "[STATUS] 16.00 tries/min, 16 tries in 00:01h\n" +
+            "[STATUS] 112.00 tries/min, 112 tries in 00:02h\n" +
+            "[STATUS] Trying admin:123456 ...\n" +
+            "[STATUS] Trying admin:qwerty ...\n" +
+            "[STATUS] Trying admin:letmein ...\n" +
+            "[STATUS] Trying admin:password123 ...\n" +
+            $"[22][ssh] host: {m2_objetivoIP}   login: admin   password: {m2_passwordEncontrada}\n" +
+            "1 of 1 target successfully completed, 1 valid password found\n" +
+            "Hydra (https://github.com/vanhauser-thc/thc-hydra) finished.";
+    }
+
+    //  SSH 
+    string CmdSsh(string[] args)
+    {
+        if (args.Length == 0)
+            return Error("ssh: missing target. Usage: ssh user@host");
+
+        string target = args[args.Length - 1];
+
+        if (!target.Contains("@"))
+            return Error("ssh: invalid format. Use: ssh user@host");
+
+        string[] parts = target.Split('@');
+        string   user  = parts[0];
+        string   host  = parts[1];
+
+        if (host != m2_objetivoIP)
+            return $"ssh: connect to host {host} port 22: Connection refused";
+
+        if (!m2_ataqueRealizado)
+            return
+                $"{user}@{host}'s password:\n" +
+                $"Permission denied, please try again.\n" +
+                $"Permission denied (publickey,password).";
+
+        // Activar estado de espera, el próximo input será la contraseña
+        esperandoPasswordSSH = true;
+        sshUserPendiente     = user;
+        sshHostPendiente     = host;
+
+        return
+            $"The authenticity of host '{host}' can't be established.\n" +
+            $"ECDSA key fingerprint is SHA256:xKd9eFm3vQpL8nRt2jYs6wCb1oMu4pHe.\n" +
+            $"Warning: Permanently added '{host}' (ECDSA) to the list of known hosts.\n" +
+            $"{user}@{host}'s password:";  // ← aquí el estudiante escribe la contraseña
+    }
+
+    string ProcesarPasswordSSH(string input)
+    {
+        esperandoPasswordSSH = false; // reset del estado siempre
+
+        if (input == m2_passwordEncontrada)
+        {
+            // Contraseña correcta — iniciar sesión
+            m2_sesionSSH     = true;
+            CurrentUser      = sshUserPendiente;
+            CurrentDirectory = $"/home/{sshUserPendiente}";
+
+            InicializarServidorObjetivo();
+
+            return
+                $"Linux target-server 4.19.0-kali3-amd64 #1 SMP Kali 4.19.20\n" +
+                $"Last login: Mon Jan 15 09:23:11 2024 from 192.168.1.50\n" +
+                $"Welcome to target-server!\n" +
+                $"{sshUserPendiente}@target-server:~$";
+        }
+        else
+        {
+            // Contraseña incorrecta — dar una segunda oportunidad
+            esperandoPasswordSSH = true; // volver a esperar
+            intentosSSH++;
+
+            if (intentosSSH >= 3)
+            {
+                // Demasiados intentos
+                esperandoPasswordSSH = false;
+                intentosSSH          = 0;
+                return
+                    $"{sshUserPendiente}@{sshHostPendiente}'s password:\n" +
+                    $"Permission denied, please try again.\n" +
+                    $"{sshUserPendiente}@{sshHostPendiente}'s password:\n" +
+                    $"Permission denied (publickey,password).\n" +
+                    $"Tip: usa el comando que encontraste con hydra";
+            }
+
+            return $"Permission denied, please try again.\n{sshUserPendiente}@{sshHostPendiente}'s password:";
+        }
+    }
+    int intentosSSH = 0;
+
+    //Inicializar filesystem del servidor objetivo
+    void InicializarServidorObjetivo()
+    {
+        string home = $"/home/admin";
+
+        // Evitar duplicar si ya existe
+        if (fileSystem.ContainsKey(home)) return;
+
+        // Estructura del servidor objetivo
+        fileSystem[home]              = new List<string> { "notas.txt", "backup" };
+        fileSystem[$"{home}/backup"]  = new List<string> { "db_backup.sql", "config.bak" };
+        fileSystem["/root"]           = new List<string> { "secreto.txt", "flag.txt" };
+        fileSystem["/root"]           = new List<string> { "secreto.txt", "flag.txt" };
+
+        fileContents[$"{home}/notas.txt"] =
+            "Recordatorio: cambiar contraseña del servidor\n" +
+            "IP base de datos: 10.0.0.5\n" +
+            "Usuario DB: dbadmin\n" +
+            "IMPORTANTE: revisa la carpeta backup, hay credenciales viejas\n" +
+            "El administrador root guarda cosas importantes en su carpeta";
+
+        fileContents[$"{home}/backup/db_backup.sql"] =
+            "-- MySQL dump\n" +
+            "-- Host: localhost\n" +
+            "CREATE TABLE users (\n" +
+            "  id INT PRIMARY KEY,\n" +
+            "  username VARCHAR(50),\n" +
+            "  password VARCHAR(255)\n" +
+            ");\n" +
+            "INSERT INTO users VALUES (1,'admin','$2y$10$hashed_password');";
+
+        fileContents[$"{home}/backup/config.bak"] =
+            "DB_HOST=10.0.0.5\n" +
+            "DB_USER=dbadmin\n" +
+            "DB_PASS=Sup3rS3cr3t!\n" +
+            "APP_KEY=base64:kDx92mNvPqL3rTsW\n" +
+            "# NOTA: el archivo de configuracion maestro esta en /root/secreto.txt\n" +
+            "# Solo root puede leerlo";
+
+        fileContents["/root/secreto.txt"] =
+            "=== ARCHIVO CONFIDENCIAL ===\n" +
+            "Credenciales sistema de nomina:\n" +
+            "Usuario: finanzas_admin\n" +
+            "Password: N0m1n4_2024!\n" +
+            "Servidor: 10.0.0.10:3306\n" +
+            "---\n" +
+            "Ver flag.txt para confirmacion de acceso";
+
+        fileContents["/root/flag.txt"] =
+            " _____ _     ___ ___ _ \n" +
+            "|  ___| |   / _ \\/ __| |\n" +
+            "| |_  | |  | | | \\__ \\ |\n" +
+            "|  _| | |__| |_| /___/ |\n" +
+            "|_|   |_____\\___/|____/|\n" +
+            "\n" +
+            "FLAG{br4ck3t_h4ck3r_m0dul0_2_c0mpl3t4d0}\n" +
+            "\n" +
+            "¡Felicitaciones! Completaste el Modulo 2.\n" +
+            "Habilidades demostradas:\n" +
+            "  [+] Reconocimiento de red con ifconfig y ping\n" +
+            "  [+] Escaneo de puertos con nmap\n" +
+            "  [+] Ataque de fuerza bruta con hydra\n" +
+            "  [+] Acceso remoto por SSH\n" +
+            "  [+] Post-explotacion y escalada de directorios";
+
+        fileOwners[$"{home}/notas.txt"]          = "admin";
+        fileOwners[$"{home}/backup/db_backup.sql"] = "admin";
+        fileOwners[$"{home}/backup/config.bak"]  = "admin";
+        fileOwners["/root/secreto.txt"]          = "root";
+        fileOwners["/root/flag.txt"]             = "root";
+        filePermissions[$"{home}/notas.txt"]     = "-rw-r--r--";
+        filePermissions["/root/secreto.txt"]     = "-rw-------";
+        filePermissions["/root/flag.txt"]        = "-rw-------";
+    }
+
+    // SERVICE (iniciar/detener servicios)
+    string CmdService(string[] args)
+    {
+        if (args.Length < 2)
+            return Error("service: Usage: service <name> <start|stop|status>");
+
+        string name   = args[0];
+        string action = args[1];
+
+        if (action == "status")
+        {
+            bool activo = name == "ssh" || name == "apache2";
+            return activo
+                ? $"● {name}.service - {name} server\n" +
+                  $"   Loaded: loaded (/lib/systemd/system/{name}.service)\n" +
+                  $"   Active: active (running) since Mon 2024-01-15 09:00:00 UTC"
+                : $"● {name}.service\n" +
+                  $"   Loaded: loaded (/lib/systemd/system/{name}.service)\n" +
+                  $"   Active: inactive (dead)";
+        }
+
+        return $"[ ok ] {action}ing {name} daemon...";
+    }
+
+    string CmdPing(string[] args)
+    {
+        if (args.Length == 0) 
+            return Error("ping: usage error: Destination address required");
+
+        int    count = 4;
+        string host  = "";
+
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == "-c" && i + 1 < args.Length)
+                int.TryParse(args[++i], out count);
+            else if (!args[i].StartsWith("-"))
+                host = args[i];
+        }
+
+        if (string.IsNullOrEmpty(host))
+            return Error("ping: usage error: Destination address required");
+
+        // IP simulada según host
+        string ip = host == "localhost" || host == "127.0.0.1"
+            ? "127.0.0.1"
+            : host == m2_objetivoIP
+                ? m2_objetivoIP
+                : host.Replace("www.", "").Length > 0
+                    ? "93.184.216.34"
+                    : host;
+
+        // Si es el objetivo del módulo 2, marcar como pingado
+        if (host == m2_objetivoIP)
+            m2_objetivoPingado = true;
+
+        count = Mathf.Clamp(count, 1, 6);
+
+        var    sb  = new System.Text.StringBuilder();
+        var    rng = new System.Random();
+
+        sb.AppendLine($"PING {host} ({ip}) 56(84) bytes of data.");
+
+        for (int i = 0; i < count; i++)
+        {
+            float ms = (float)(rng.NextDouble() * 20 + 1);
+            sb.AppendLine($"64 bytes from {ip}: icmp_seq={i + 1} ttl=64 time={ms:F2} ms");
+        }
+
+        sb.AppendLine($"");
+        sb.AppendLine($"--- {host} ping statistics ---");
+        sb.AppendLine($"{count} packets transmitted, {count} received, 0% packet loss");
+        sb.Append($"rtt min/avg/max = 1.0/10.5/21.0 ms");
+
+        return sb.ToString();
     }
 
     public List<string> GetEntradas(string dirPath)
