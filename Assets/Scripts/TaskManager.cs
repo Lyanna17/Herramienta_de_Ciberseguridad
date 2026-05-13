@@ -1,30 +1,53 @@
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class TaskManager : MonoBehaviour
 {
     [Header("Panel de Tareas")]
     public GameObject taskPanel;
+    public RectTransform taskPanelRect;
 
-    [Header("Tareas - Toggles visuales")]
-    public TextMeshProUGUI taskTerminalAbrir;
-    public TextMeshProUGUI taskTerminalCerrar;
-    public TextMeshProUGUI taskLibroAbrir;
-    public TextMeshProUGUI taskNotasAbrir;
+    [Header("Prefabs")]
+    public GameObject blockTitlePrefab;
+    public GameObject taskItemPrefab;
 
-    private bool terminalAbierta  = false;
-    private bool terminalCerrada  = false;
-    private bool libroAbierto     = false;
-    private bool notasAbiertas    = false;
+    [Header("Contenedor")]
+    public Transform taskContainer;
 
     private bool panelVisible = false;
+    private int bloqueActual = 0;
+    private int tareaActual  = 0;
+    private List<TextMeshProUGUI> tareasUI = new List<TextMeshProUGUI>();
+
+    private string[] titulosBloques = new string[]
+    {
+        "Bloque 1 — ¿Quién soy y dónde estoy?",
+        "Bloque 2 — Navegación por el sistema",
+        "Bloque 3 — Crea tus propios archivos y carpetas",
+        "Bloque 4 — Lectura de archivos",
+        "Bloque 5 — Permisos de archivos",
+        "Bloque 6 — Eliminación de archivos",
+        "Bloque 7 — Cambio de propietario y cierre del sistema",
+        "Bloque 8 — Conoce tu herramienta de ayuda"
+    };
+
+    private string[][] tareasPorBloque = new string[][]
+    {
+        new string[] { "Abre la terminal", "Ejecuta: whoami", "Ejecuta: pwd", "Ejecuta: ls" },
+        new string[] { "Ejecuta: cd Documents", "Ejecuta: pwd", "Ejecuta: ls", "Ejecuta: cd .." },
+        new string[] { "Ejecuta: mkdir mis_archivos", "Ejecuta: cd mis_archivos", "Ejecuta: echo \"Hola mundo\" > saludo.txt", "Ejecuta: echo \"Linux es genial\" > nota.txt", "Ejecuta: ls" },
+        new string[] { "Ejecuta: cat saludo.txt", "Ejecuta: cat nota.txt" },
+        new string[] { "Ejecuta: cd /home/sysadmin/Documents", "Ejecuta: chmod u+x hello.sh", "Ejecuta: ls -l" },
+        new string[] { "Ejecuta: cd /home/sysadmin/mis_archivos", "Ejecuta: rm nota.txt", "Ejecuta: ls" },
+        new string[] { "Ejecuta: su", "Ejecuta: cd /home/sysadmin/Documents", "Ejecuta: chown root animals.txt", "Ejecuta: ls -l", "Ejecuta: cd /", "Ejecuta: shutdown -h now" },
+        new string[] { "Cierra la terminal", "Abre el Handbook y Explora Terminal Commands", "Cierra el Handbook" }
+    };
 
     void Start()
     {
         taskPanel.SetActive(false);
-        ActualizarUI();
+        CargarBloque(0);
     }
 
     public void ToggleTaskPanel()
@@ -33,54 +56,103 @@ public class TaskManager : MonoBehaviour
         taskPanel.SetActive(panelVisible);
     }
 
-    public void OnTerminalAbierta()
+    void CargarBloque(int bloque)
     {
-        if (terminalAbierta) return;
-        terminalAbierta = true;
-        ActualizarUI();
-    }
+        foreach (Transform child in taskContainer)
+            Destroy(child.gameObject);
 
-    public void OnTerminalCerrada()
-    {
-        if (!terminalAbierta) return;
-        if (terminalCerrada) return;
-        terminalCerrada = true;
-        ActualizarUI();
-    }
+        tareasUI.Clear();
+        tareaActual  = 0;
+        bloqueActual = bloque;
 
-    public void OnLibroAbierto()
-    {
-        if (libroAbierto) return;
-        libroAbierto = true;
-        ActualizarUI();
-    }
+        GameObject titulo = Instantiate(blockTitlePrefab, taskContainer);
+        titulo.GetComponent<TextMeshProUGUI>().text = titulosBloques[bloque];
 
-    public void OnNotasAbiertas()
-    {
-        if (notasAbiertas) return;
-        notasAbiertas = true;
+        foreach (string tarea in tareasPorBloque[bloque])
+        {
+            GameObject item = Instantiate(taskItemPrefab, taskContainer);
+            TextMeshProUGUI tmp = item.GetComponent<TextMeshProUGUI>();
+            tmp.text  = tarea;
+            tmp.color = Color.white;
+            tareasUI.Add(tmp);
+        }
+
         ActualizarUI();
     }
 
     void ActualizarUI()
     {
-        SetTask(taskTerminalAbrir,  terminalAbierta,  "Abre la terminal");
-        SetTask(taskTerminalCerrar, terminalCerrada,  "Cierra la terminal");
-        SetTask(taskLibroAbrir,     libroAbierto,     "Abre el libro");
-        SetTask(taskNotasAbrir,     notasAbiertas,    "Abre el bloc de notas");
+        for (int i = 0; i < tareasUI.Count; i++)
+        {
+            if (i < tareaActual)
+            {
+                tareasUI[i].text  = $"<s>{tareasPorBloque[bloqueActual][i]}</s>";
+                tareasUI[i].color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            }
+            else
+            {
+                tareasUI[i].text  = tareasPorBloque[bloqueActual][i];
+                tareasUI[i].color = Color.white;
+            }
+        }
     }
 
-    void SetTask(TextMeshProUGUI label, bool completada, string texto)
+    public void CompletarTareaActual()
     {
-        if (completada)
+        if (bloqueActual >= titulosBloques.Length) return;
+        if (tareaActual >= tareasPorBloque[bloqueActual].Length) return;
+
+        tareaActual++;
+        ActualizarUI();
+
+        if (tareaActual >= tareasPorBloque[bloqueActual].Length)
         {
-            label.text  = $"<s>{texto}</s>";
-            label.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-        }
-        else
-        {
-            label.text  = texto;
-            label.color = Color.white;
+            int siguienteBloque = bloqueActual + 1;
+            if (siguienteBloque < titulosBloques.Length)
+                CargarBloque(siguienteBloque);
+            else
+                MostrarCompletado();
         }
     }
+
+    private void CompletarSiCoincide(string accion)
+    {
+        if (bloqueActual >= titulosBloques.Length) return;
+        if (tareaActual >= tareasPorBloque[bloqueActual].Length) return;
+
+        string tareaTexto = tareasPorBloque[bloqueActual][tareaActual];
+
+        if (tareaTexto.Trim() == accion.Trim())
+            CompletarTareaActual();
+    }
+
+    void MostrarCompletado()
+    {
+        foreach (Transform child in taskContainer)
+            Destroy(child.gameObject);
+
+        GameObject item = Instantiate(blockTitlePrefab, taskContainer);
+        item.GetComponent<TextMeshProUGUI>().text = "¡Módulo completado!";
+    }
+
+    public void OnComandoEjecutado(string comando)
+    {
+        if (bloqueActual >= titulosBloques.Length) return;
+        if (tareaActual >= tareasPorBloque[bloqueActual].Length) return;
+
+        string tareaTexto = tareasPorBloque[bloqueActual][tareaActual];
+
+        if (tareaTexto.StartsWith("Ejecuta: "))
+        {
+            string comandoEsperado = tareaTexto.Substring("Ejecuta: ".Length).Trim();
+            if (comando.Trim() == comandoEsperado)
+                CompletarTareaActual();
+        }
+    }
+
+    public void OnTerminalAbierta()  { CompletarSiCoincide("Abre la terminal"); }
+    public void OnTerminalCerrada()  { CompletarSiCoincide("Cierra la terminal"); }
+    public void OnLibroAbierto()     { CompletarSiCoincide("Abre el Handbook y Explora Terminal Commands"); }
+    public void OnLibroCerrado()     { CompletarSiCoincide("Cierra el Handbook"); }
+    public void OnNotasAbiertas()    { CompletarSiCoincide("Abre las notas"); }
 }

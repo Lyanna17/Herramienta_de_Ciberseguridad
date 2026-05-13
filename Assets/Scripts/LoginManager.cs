@@ -63,6 +63,7 @@ public class LoginManager : MonoBehaviour
             PlayerPrefs.SetString("NombreEstudiante", resp.nombre);
             PlayerPrefs.SetString("UsuarioActual", inputUsuario.text.Trim());
             PlayerPrefs.SetInt("TutorialCompletado", resp.tutorial_completado ? 1 : 0);
+            PlayerPrefs.SetString("UltimoAcceso", resp.ultimo_acceso);
             PlayerPrefs.Save();
             SceneManager.LoadScene(ESCENA_SIGUIENTE);
         }
@@ -79,5 +80,6 @@ public class LoginManager : MonoBehaviour
         public string message;
         public string nombre;
         public bool   tutorial_completado;
+        public string ultimo_acceso;
     }
 }

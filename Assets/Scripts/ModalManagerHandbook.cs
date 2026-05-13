@@ -9,6 +9,8 @@ public class ModalManagerHandbook : MonoBehaviour
     [Header("Animacion")]
     public float animSpeed = 8f;
 
+    private TaskManager taskManager;
+
     void Awake()
     {
         if (instance == null)
@@ -17,17 +19,24 @@ public class ModalManagerHandbook : MonoBehaviour
             Destroy(gameObject);
     }
 
+    void Start()
+    {
+        taskManager = FindObjectOfType<TaskManager>();
+    }
+
     public void ShowModal()
     {
         modalWindow.SetActive(true);
         StopAllCoroutines();
         StartCoroutine(ScaleUp());
+        if (taskManager != null) taskManager.OnLibroAbierto();
     }
 
     public void HideModal()
     {
         modalWindow.transform.localScale = Vector3.one;
         modalWindow.SetActive(false);
+        if (taskManager != null) taskManager.OnLibroCerrado();
     }
 
     IEnumerator ScaleUp()

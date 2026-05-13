@@ -16,11 +16,13 @@ public class TerminalManager : MonoBehaviour
     float initialMsgListHeight;
 
     Interpreter interpreter;
+    TaskManager taskManager;
 
     void Start()
     {
         interpreter = GetComponent<Interpreter>();
         initialMsgListHeight = msgList.GetComponent<RectTransform>().sizeDelta.y;
+        taskManager = FindObjectOfType<TaskManager>();
     }
 
     private void OnGUI()
@@ -32,7 +34,6 @@ public class TerminalManager : MonoBehaviour
 
             List<string> interpretation = interpreter.Interpret(userInput);
 
-            // CLEAR 
             if (interpretation.Count == 1 && interpretation[0] == "%%CLEAR%%")
             {
                 ClearTerminal();
@@ -42,31 +43,6 @@ public class TerminalManager : MonoBehaviour
                 return;
             }
 
-            AddDirectoryLine(userInput);
-            int lines = AddInterpreterLines(interpretation);
-            ScrollToBottom(lines);
-            userInputLine.transform.SetAsLastSibling();
-            terminalInput.ActivateInputField();
-            terminalInput.Select();
-        }
-
-                if (terminalInput.isFocused && terminalInput.text != "" && Input.GetKeyDown(KeyCode.Return))
-        {
-            string userInput = terminalInput.text;
-            ClearInputField();
-
-            List<string> interpretation = interpreter.Interpret(userInput);
-
-            if (interpretation.Count == 1 && interpretation[0] == "%%CLEAR%%")
-            {
-                ClearTerminal();
-                userInputLine.transform.SetAsLastSibling();
-                terminalInput.ActivateInputField();
-                terminalInput.Select();
-                return;
-            }
-
-            // Si estaba esperando password, mostrar asteriscos en vez del texto
             string displayInput = interpreter.EsperandoPassword()
                 ? new string('*', userInput.Length)
                 : userInput;
@@ -78,6 +54,10 @@ public class TerminalManager : MonoBehaviour
             userInputLine.transform.SetAsLastSibling();
             terminalInput.ActivateInputField();
             terminalInput.Select();
+
+            // Notificar al TaskManager
+            if (taskManager != null)
+                taskManager.OnComandoEjecutado(userInput.Trim());
         }
     }
 
@@ -88,7 +68,6 @@ public class TerminalManager : MonoBehaviour
 
     void ClearTerminal()
     {
-        // Destruir todos los hijos excepto userInputLine
         var toDestroy = new List<GameObject>();
         foreach (Transform child in msgList.transform)
         {
@@ -98,7 +77,6 @@ public class TerminalManager : MonoBehaviour
         foreach (GameObject go in toDestroy)
             Destroy(go);
 
-        // Resetear altura del contenedor
         RectTransform rt = msgList.GetComponent<RectTransform>();
         rt.sizeDelta = new Vector2(rt.sizeDelta.x, initialMsgListHeight);
 

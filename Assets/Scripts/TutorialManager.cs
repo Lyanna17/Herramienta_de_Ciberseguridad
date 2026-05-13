@@ -90,10 +90,15 @@ public class TutorialManager : MonoBehaviour
 
         welcomePanel.SetActive(false);
 
-        tutorialCanvas = terminalIcon.AddComponent<Canvas>();
+        tutorialCanvas = terminalIcon.GetComponent<Canvas>();
+        if (tutorialCanvas == null)
+            tutorialCanvas = terminalIcon.AddComponent<Canvas>();
         tutorialCanvas.overrideSorting = true;
         tutorialCanvas.sortingOrder = 10;
-        tutorialRaycaster = terminalIcon.AddComponent<GraphicRaycaster>();
+
+        tutorialRaycaster = terminalIcon.GetComponent<GraphicRaycaster>();
+        if (tutorialRaycaster == null)
+            tutorialRaycaster = terminalIcon.AddComponent<GraphicRaycaster>();
 
         terminalTutorialPanel.SetActive(true);
     }
@@ -128,10 +133,15 @@ public class TutorialManager : MonoBehaviour
         yield return null;
         if (tutorialCanvas != null) Destroy(tutorialCanvas);
 
-        libroCanvas = libroIcon.AddComponent<Canvas>();
+        libroCanvas = libroIcon.GetComponent<Canvas>();
+        if (libroCanvas == null)
+            libroCanvas = libroIcon.AddComponent<Canvas>();
         libroCanvas.overrideSorting = true;
         libroCanvas.sortingOrder = 10;
-        libroRaycaster = libroIcon.AddComponent<GraphicRaycaster>();
+
+        libroRaycaster = libroIcon.GetComponent<GraphicRaycaster>();
+        if (libroRaycaster == null)
+            libroRaycaster = libroIcon.AddComponent<GraphicRaycaster>();
 
         libroTutorialPanel.SetActive(true);
     }
@@ -140,9 +150,9 @@ public class TutorialManager : MonoBehaviour
     {
         libroTutorialPanel.SetActive(false);
 
-        RectTransform libroRect    = libroIcon.GetComponent<RectTransform>();
-        RectTransform taskRect     = bttonTaskIcon.GetComponent<RectTransform>();
-        RectTransform panelRect    = libroTutorialPanel.GetComponent<RectTransform>();
+        RectTransform libroRect = libroIcon.GetComponent<RectTransform>();
+        RectTransform taskRect  = bttonTaskIcon.GetComponent<RectTransform>();
+        RectTransform panelRect = libroTutorialPanel.GetComponent<RectTransform>();
 
         Vector2 startPos = panelRect.anchoredPosition;
         Vector2 endPos   = panelRect.anchoredPosition +
@@ -166,10 +176,15 @@ public class TutorialManager : MonoBehaviour
         yield return null;
         if (libroCanvas != null) Destroy(libroCanvas);
 
-        taskCanvas = bttonTaskIcon.AddComponent<Canvas>();
+        taskCanvas = bttonTaskIcon.GetComponent<Canvas>();
+        if (taskCanvas == null)
+            taskCanvas = bttonTaskIcon.AddComponent<Canvas>();
         taskCanvas.overrideSorting = true;
         taskCanvas.sortingOrder = 10;
-        taskRaycaster = bttonTaskIcon.AddComponent<GraphicRaycaster>();
+
+        taskRaycaster = bttonTaskIcon.GetComponent<GraphicRaycaster>();
+        if (taskRaycaster == null)
+            taskRaycaster = bttonTaskIcon.AddComponent<GraphicRaycaster>();
 
         bttonTaskPanel.SetActive(true);
     }

@@ -4,9 +4,6 @@ using UnityEngine;
 public class Interpreter : MonoBehaviour
 {
     [Header("Prefabs visuales (solo decorativos)")]
-
-    [Header("Task Manager Módulo 2")]
-    public TaskManager2 taskManager2;
     public GameObject folderPrefab;
     public GameObject textFilePrefab;
     public Transform  desktopArea;
@@ -85,9 +82,6 @@ public class Interpreter : MonoBehaviour
                     response.Add(display);
             }
         }
-
-        if (taskManager2 != null)
-            taskManager2.OnComandoEjecutado(userInput);
 
         return response;
     }
