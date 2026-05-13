@@ -17,12 +17,14 @@ public class TerminalManager : MonoBehaviour
 
     Interpreter interpreter;
     TaskManager taskManager;
+    TaskManager2 taskManager2;
 
     void Start()
     {
         interpreter = GetComponent<Interpreter>();
         initialMsgListHeight = msgList.GetComponent<RectTransform>().sizeDelta.y;
-        taskManager = FindObjectOfType<TaskManager>();
+        taskManager  = FindObjectOfType<TaskManager>();
+        taskManager2 = FindObjectOfType<TaskManager2>();
     }
 
     private void OnGUI()
@@ -55,9 +57,12 @@ public class TerminalManager : MonoBehaviour
             terminalInput.ActivateInputField();
             terminalInput.Select();
 
-            // Notificar al TaskManager
+            // Notifica al TaskManager que corresponda según la escena activa
             if (taskManager != null)
                 taskManager.OnComandoEjecutado(userInput.Trim());
+
+            if (taskManager2 != null)
+                taskManager2.OnComandoEjecutado(userInput.Trim());
         }
     }
 
