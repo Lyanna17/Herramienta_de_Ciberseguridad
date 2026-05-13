@@ -901,14 +901,14 @@ public class TerminalSystem
             "\n" +
             "¡Felicitaciones! Completaste el Modulo 2";
 
-        fileOwners[$"{home}/notas.txt"]          = "admin";
-        fileOwners[$"{home}/backup/db_backup.sql"] = "admin";
-        fileOwners[$"{home}/backup/config.bak"]  = "admin";
-        fileOwners["/root/secreto.txt"]          = "root";
-        fileOwners["/root/flag.txt"]             = "root";
-        filePermissions[$"{home}/notas.txt"]     = "-rw-r--r--";
-        filePermissions["/root/secreto.txt"]     = "-rw-------";
-        filePermissions["/root/flag.txt"]        = "-rw-------";
+        fileOwners[$"{home}/notas.txt"]             = "admin";
+        fileOwners[$"{home}/backup/db_backup.sql"]  = "admin";
+        fileOwners[$"{home}/backup/config.bak"]     = "admin";
+        fileOwners["/root/secreto.txt"]             = "root";
+        fileOwners["/root/flag.txt"]                = "root";
+        filePermissions[$"{home}/notas.txt"]        = "-rw-r--r--";
+        filePermissions["/root/secreto.txt"]        = "-rw-------";
+        filePermissions["/root/flag.txt"]           = "-rw-------";
     }
 
     // SERVICE (iniciar/detener servicios)

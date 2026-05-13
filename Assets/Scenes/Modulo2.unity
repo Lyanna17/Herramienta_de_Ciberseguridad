@@ -912,7 +912,7 @@ GameObject:
   - component: {fileID: 229534964}
   - component: {fileID: 229534963}
   m_Layer: 5
-  m_Name: 'TaskTerminalAbrir '
+  m_Name: txtProgreso
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1407,7 +1407,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &450278861
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1749,7 +1749,7 @@ GameObject:
   - component: {fileID: 555355393}
   - component: {fileID: 555355392}
   m_Layer: 5
-  m_Name: TaskLibroAbrir
+  m_Name: txtTarea1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2739,7 +2739,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1692501063}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: TaskManager, Assembly-CSharp
         m_MethodName: ToggleTaskPanel
         m_Mode: 1
@@ -3430,6 +3430,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2a4c1913f1bbab41aa39f520f8e1177, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  taskManager2: {fileID: 0}
   folderPrefab: {fileID: 126656637939646596, guid: 07ae2776392194b49858b70284c4872b, type: 3}
   textFilePrefab: {fileID: 1797138845105349825, guid: 8bb3e06e38cdfcc4c9415047b10bfb35, type: 3}
   desktopArea: {fileID: 840554031}
@@ -3631,7 +3632,7 @@ GameObject:
   - component: {fileID: 853728723}
   - component: {fileID: 853728722}
   m_Layer: 5
-  m_Name: TituloTask
+  m_Name: txtFase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5065,7 +5066,7 @@ RectTransform:
   m_GameObject: {fileID: 1139694222}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1.2331, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 853728721}
@@ -5073,11 +5074,12 @@ RectTransform:
   - {fileID: 1449017033}
   - {fileID: 555355391}
   - {fileID: 1420651464}
+  - {fileID: 1690334605}
   m_Father: {fileID: 450278861}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 266, y: 107}
+  m_AnchoredPosition: {x: 266, y: 93.4}
   m_SizeDelta: {x: 239.62, y: 168.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1139694224
@@ -6188,7 +6190,7 @@ GameObject:
   - component: {fileID: 1420651466}
   - component: {fileID: 1420651465}
   m_Layer: 5
-  m_Name: TaskNotasAbrir
+  m_Name: txtTarea2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6322,7 +6324,7 @@ GameObject:
   - component: {fileID: 1449017035}
   - component: {fileID: 1449017034}
   m_Layer: 5
-  m_Name: TaskTerminalCerrar
+  m_Name: txtPista
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7317,6 +7319,140 @@ MonoBehaviour:
   sprite_su: {fileID: 21300000, guid: 333f406946a3b4246b62f2ad6c23c100, type: 3}
   colorNormal: {r: 0.12, g: 0.12, b: 0.12, a: 1}
   colorSeleccionado: {r: 0.23, g: 0.23, b: 0.23, a: 1}
+--- !u!1 &1690334604
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1690334605}
+  - component: {fileID: 1690334607}
+  - component: {fileID: 1690334606}
+  m_Layer: 5
+  m_Name: txtTarea3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1690334605
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1690334604}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1139694223}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 31.999968, y: -71.99998}
+  m_SizeDelta: {x: 200, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1690334606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1690334604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: 
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 18.7
+  m_fontSizeBase: 18.7
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 1
+  m_VerticalAlignment: 256
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_enableWordWrapping: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 1
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1690334607
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1690334604}
+  m_CullTransparentMesh: 1
 --- !u!1 &1692501061
 GameObject:
   m_ObjectHideFlags: 0
@@ -7362,14 +7498,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1692501061}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 204967458ff04a54a98fa054fbf8710f, type: 3}
+  m_Script: {fileID: 11500000, guid: 88b68f3dca188784cb0c9533b8449e89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   taskPanel: {fileID: 1139694222}
-  taskTerminalAbrir: {fileID: 229534963}
-  taskTerminalCerrar: {fileID: 1449017034}
-  taskLibroAbrir: {fileID: 555355392}
-  taskNotasAbrir: {fileID: 1420651465}
+  txtFase: {fileID: 853728722}
+  txtTarea1: {fileID: 555355392}
+  txtTarea2: {fileID: 1420651465}
+  txtTarea3: {fileID: 1690334606}
+  txtProgreso: {fileID: 229534963}
+  txtPista: {fileID: 1449017034}
 --- !u!1 &1799562637
 GameObject:
   m_ObjectHideFlags: 0
