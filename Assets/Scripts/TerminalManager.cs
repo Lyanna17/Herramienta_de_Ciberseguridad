@@ -18,13 +18,15 @@ public class TerminalManager : MonoBehaviour
     Interpreter interpreter;
     TaskManager taskManager;
     TaskManager2 taskManager2;
+    TaskManagerPractice taskManagerPractice;
 
     void Start()
     {
         interpreter = GetComponent<Interpreter>();
         initialMsgListHeight = msgList.GetComponent<RectTransform>().sizeDelta.y;
-        taskManager  = FindObjectOfType<TaskManager>();
-        taskManager2 = FindObjectOfType<TaskManager2>();
+        taskManager         = FindObjectOfType<TaskManager>();
+        taskManager2        = FindObjectOfType<TaskManager2>();
+        taskManagerPractice = FindObjectOfType<TaskManagerPractice>();
     }
 
     private void OnGUI()
@@ -63,6 +65,9 @@ public class TerminalManager : MonoBehaviour
 
             if (taskManager2 != null)
                 taskManager2.OnComandoEjecutado(userInput.Trim());
+
+            if (taskManagerPractice != null)
+                taskManagerPractice.OnComandoEjecutado(userInput.Trim());
         }
     }
 

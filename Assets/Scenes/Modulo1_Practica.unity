@@ -2472,7 +2472,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1692501063}
-        m_TargetAssemblyTypeName: TaskManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TaskManagerPractice, Assembly-CSharp
         m_MethodName: ToggleTaskPanel
         m_Mode: 1
         m_Arguments:
@@ -6865,7 +6865,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1692501061}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 204967458ff04a54a98fa054fbf8710f, type: 3}
+  m_Script: {fileID: 11500000, guid: de933a38febf2ad458b432728cf01c0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   taskPanel: {fileID: 1139694222}
