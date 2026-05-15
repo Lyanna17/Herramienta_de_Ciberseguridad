@@ -3065,16 +3065,16 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 782628380}
-        m_TargetAssemblyTypeName: LogoutManager, Assembly-CSharp
-        m_MethodName: Logout
-        m_Mode: 1
+      - m_Target: {fileID: 840554038}
+        m_TargetAssemblyTypeName: CambiarNivel, Assembly-CSharp
+        m_MethodName: CambiarEscena
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: modulos
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &782628378
@@ -3281,6 +3281,7 @@ GameObject:
   - component: {fileID: 840554035}
   - component: {fileID: 840554036}
   - component: {fileID: 840554037}
+  - component: {fileID: 840554038}
   m_Layer: 5
   m_Name: PC
   m_TagString: Untagged
@@ -3470,6 +3471,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modalWindow: {fileID: 1606374325}
   animSpeed: 25
+--- !u!114 &840554038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840554027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b152d3ecf5b6cfb4088e6dbbaa88a973, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &843957970
 GameObject:
   m_ObjectHideFlags: 0
