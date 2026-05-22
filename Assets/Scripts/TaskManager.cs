@@ -20,6 +20,8 @@ public class TaskManager : MonoBehaviour
     private int tareaActual  = 0;
     private List<TextMeshProUGUI> tareasUI = new List<TextMeshProUGUI>();
 
+    public event System.Action<int, int> OnBloqueCompletado;
+
     private string[] titulosBloques = new string[]
     {
         "Bloque 1 — ¿Quién soy y dónde estoy?",
@@ -47,7 +49,6 @@ public class TaskManager : MonoBehaviour
     void Start()
     {
         taskPanel.SetActive(false);
-        CargarBloque(0);
     }
 
     public void ToggleTaskPanel()
@@ -108,6 +109,10 @@ public class TaskManager : MonoBehaviour
         if (tareaActual >= tareasPorBloque[bloqueActual].Length)
         {
             int siguienteBloque = bloqueActual + 1;
+
+            int bloquesCompletados = bloqueActual + 1;
+            OnBloqueCompletado?.Invoke(bloquesCompletados, titulosBloques.Length);
+
             if (siguienteBloque < titulosBloques.Length)
                 CargarBloque(siguienteBloque);
             else
@@ -155,4 +160,16 @@ public class TaskManager : MonoBehaviour
     public void OnLibroAbierto()     { CompletarSiCoincide("Abre el Handbook y Explora Terminal Commands"); }
     public void OnLibroCerrado()     { CompletarSiCoincide("Cierra el Handbook"); }
     public void OnNotasAbiertas()    { CompletarSiCoincide("Abre las notas"); }
+
+    // ── NUEVO: reanudar desde un bloque guardado ───────────────────────
+    public void ReanudarDesdeBloque(int bloque)
+    {
+        if (bloque >= titulosBloques.Length)
+        {
+            MostrarCompletado();
+            return;
+        }
+
+        CargarBloque(bloque);
+    }
 }

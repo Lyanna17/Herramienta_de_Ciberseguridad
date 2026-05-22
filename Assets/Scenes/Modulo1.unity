@@ -2138,7 +2138,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1606374330}
         m_TargetAssemblyTypeName: HandbookManager, Assembly-CSharp
-        m_MethodName: MostrarComando_cat
+        m_MethodName: MostrarDetalle_cat
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2819,7 +2819,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1606374330}
         m_TargetAssemblyTypeName: HandbookManager, Assembly-CSharp
-        m_MethodName: MostrarComando_cd
+        m_MethodName: MostrarDetalle_cd
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4504,7 +4504,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1606374330}
         m_TargetAssemblyTypeName: HandbookManager, Assembly-CSharp
-        m_MethodName: MostrarComando_su
+        m_MethodName: MostrarDetalle_su
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5568,7 +5568,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1606374330}
         m_TargetAssemblyTypeName: HandbookManager, Assembly-CSharp
-        m_MethodName: MostrarComando_rm
+        m_MethodName: MostrarDetalle_rm
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5616,6 +5616,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 964658900}
   m_CullTransparentMesh: 1
+--- !u!1 &966295208
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 966295210}
+  - component: {fileID: 966295209}
+  m_Layer: 0
+  m_Name: ProgresoManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &966295209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966295208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ca8cef9c55f4654886eb550e891b5e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  taskManager: {fileID: 1692501063}
+  moduloId: 1
+--- !u!4 &966295210
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966295208}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 128.7349, y: 76.31438, z: 0.04819722}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &979164204
 GameObject:
   m_ObjectHideFlags: 0
@@ -6057,7 +6103,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1606374330}
         m_TargetAssemblyTypeName: HandbookManager, Assembly-CSharp
-        m_MethodName: MostrarComando_pwd
+        m_MethodName: MostrarDetalle_pwd
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6613,7 +6659,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1606374330}
         m_TargetAssemblyTypeName: HandbookManager, Assembly-CSharp
-        m_MethodName: MostrarComando_chmod
+        m_MethodName: MostrarDetalle_chown
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7061,7 +7107,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1606374330}
         m_TargetAssemblyTypeName: HandbookManager, Assembly-CSharp
-        m_MethodName: MostrarComando_ls
+        m_MethodName: MostrarDetalle_ls
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7194,7 +7240,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1606374330}
         m_TargetAssemblyTypeName: HandbookManager, Assembly-CSharp
-        m_MethodName: MostrarComando_shutdown
+        m_MethodName: MostrarDetalle_shutdown
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8407,7 +8453,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1606374330}
         m_TargetAssemblyTypeName: HandbookManager, Assembly-CSharp
-        m_MethodName: MostrarComando_chown
+        m_MethodName: MostrarDetalle_chown
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10986,3 +11032,4 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 840554031}
   - {fileID: 555804847}
+  - {fileID: 966295210}

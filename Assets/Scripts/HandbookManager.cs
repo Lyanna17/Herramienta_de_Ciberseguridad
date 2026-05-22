@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class HandbookManager : MonoBehaviour
 {
@@ -26,7 +27,6 @@ public class HandbookManager : MonoBehaviour
     public Color colorSeleccionado = new Color(0.23f, 0.23f, 0.23f);
 
     private Button botonActual;
-    private Color colorOriginal;
     private TaskManager taskManager;
     public bool enLista = false;
 
@@ -52,6 +52,7 @@ public class HandbookManager : MonoBehaviour
         contenidoMenu.SetActive(true);
         imagenDetalle.gameObject.SetActive(false);
         DesseleccionarBoton();
+        if (taskManager != null) taskManager.OnComandoEjecutado("Explora Terminal Commands");
     }
 
     public void MostrarDetalle(Sprite sprite)
@@ -60,16 +61,15 @@ public class HandbookManager : MonoBehaviour
         imagenDetalle.sprite = sprite;
     }
 
-    public void SeleccionarBoton(Button boton)
+    void SeleccionarBoton(Button boton)
     {
-        if (botonActual != null)
-            botonActual.GetComponent<Image>().color = colorNormal;
-
+        DesseleccionarBoton();
         botonActual = boton;
-        botonActual.GetComponent<Image>().color = colorSeleccionado;
+        if (botonActual != null)
+            botonActual.GetComponent<Image>().color = colorSeleccionado;
     }
 
-    public void DesseleccionarBoton()
+    void DesseleccionarBoton()
     {
         if (botonActual != null)
         {
@@ -78,13 +78,21 @@ public class HandbookManager : MonoBehaviour
         }
     }
 
-    public void MostrarDetalle_ls()      { SeleccionarBoton(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Button>()); MostrarDetalle(sprite_ls); }
-    public void MostrarDetalle_cd()      { SeleccionarBoton(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Button>()); MostrarDetalle(sprite_cd); }
-    public void MostrarDetalle_pwd()     { SeleccionarBoton(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Button>()); MostrarDetalle(sprite_pwd); }
-    public void MostrarDetalle_cat()     { SeleccionarBoton(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Button>()); MostrarDetalle(sprite_cat); }
-    public void MostrarDetalle_rm()      { SeleccionarBoton(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Button>()); MostrarDetalle(sprite_rm); }
-    public void MostrarDetalle_chmod()   { SeleccionarBoton(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Button>()); MostrarDetalle(sprite_chmod); }
-    public void MostrarDetalle_chown()   { SeleccionarBoton(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Button>()); MostrarDetalle(sprite_chown); }
-    public void MostrarDetalle_shutdown(){ SeleccionarBoton(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Button>()); MostrarDetalle(sprite_shutdown); }
-    public void MostrarDetalle_su()      { SeleccionarBoton(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Button>()); MostrarDetalle(sprite_su); }
+    void MostrarComando(Sprite sprite)
+    {
+        GameObject go = EventSystem.current.currentSelectedGameObject;
+        if (go != null)
+            SeleccionarBoton(go.GetComponent<Button>());
+        MostrarDetalle(sprite);
+    }
+
+    public void MostrarDetalle_ls()       { MostrarComando(sprite_ls); }
+    public void MostrarDetalle_cd()       { MostrarComando(sprite_cd); }
+    public void MostrarDetalle_pwd()      { MostrarComando(sprite_pwd); }
+    public void MostrarDetalle_cat()      { MostrarComando(sprite_cat); }
+    public void MostrarDetalle_rm()       { MostrarComando(sprite_rm); }
+    public void MostrarDetalle_chmod()    { MostrarComando(sprite_chmod); }
+    public void MostrarDetalle_chown()    { MostrarComando(sprite_chown); }
+    public void MostrarDetalle_shutdown() { MostrarComando(sprite_shutdown); }
+    public void MostrarDetalle_su()       { MostrarComando(sprite_su); }
 }

@@ -548,6 +548,8 @@ MonoBehaviour:
   txtNombre: {fileID: 1961085400}
   txtIniciales: {fileID: 1352086861}
   txtUltimoAcceso: {fileID: 1446099049}
+  barrasProgreso:
+  - {fileID: 1095587609}
 --- !u!114 &365505928
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1519,12 +1521,12 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
+  m_FillMethod: 0
+  m_FillAmount: 0
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
