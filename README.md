@@ -158,6 +158,6 @@ All cybersecurity exercises are designed to operate within controlled or simulat
 ## Authors
 
 **Lyanna17** — Developer  
-**Latorre655** — Collaborator
+**Latorre655** — Developer
 
 Developed as part of an academic cybersecurity education project at **Universidad Autónoma de Bucaramanga (UNAB)**.
